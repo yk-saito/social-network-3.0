@@ -279,7 +279,7 @@ const App = () => {
                     }}
                   >
                     <div>Address: {post.address}</div>
-                    <div>Time: {post.timestamp.toString()}</div>
+                    <div>Time: {post.timestamp.toUTCString()}</div>
                     <div>Message: {post.message}</div>
                   </div>
                 );
