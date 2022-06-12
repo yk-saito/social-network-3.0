@@ -34,6 +34,15 @@ const main = async () => {
 
     let allPosts = await postingContract.getAllPosts();
     console.log(allPosts);
+
+    await postingContract.pushLikeButton(0);
+    let allPosts2 = await postingContract.getAllPosts();
+    console.log(allPosts2);
+
+    await postingContract.pushLikeButton(0);
+    let allPosts3 = await postingContract.getAllPosts();
+    console.log(allPosts3);
+
 };
 
 const runMain = async () => {

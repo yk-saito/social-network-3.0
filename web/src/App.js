@@ -5,7 +5,7 @@ import './App.css';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
-  const contractAddress = "0x33d054BE028b49930A7775ec96D6C7e26E76D8A7";
+  const contractAddress = "0xaD6117663F9B0Fc629E5AB43791fe915564fa295";
 
   /* ABIの内容を参照 */
   const contractABI = abi.abi;
@@ -16,7 +16,7 @@ const App = () => {
 
   /* ユーザーの投稿(tubuut)を保存する */
   const [messageValue, setMessageValue] = useState("");
-  /* 全ての投稿(posts)を保存する状態変数を定義 */
+  /* 全ての投稿(posts)を保存する */
   const [allPosts, setAllPosts] = useState([]);
 
   const getAllPosts = async () => {
@@ -38,10 +38,14 @@ const App = () => {
         const posts = await postingContract.getAllPosts();
         // UIで使用するデータを設定
         const postsCleaned = posts.map((post) => {
+          console.log("raw timestamp: ", post.timestamp);
           return {
-            address: post.address,
+            id: post.id,
+            user: post.user,
+            rawTimestamp: post.timestamp,
             timestamp: new Date(post.timestamp * 1000),
             message: post.message,
+            allLikes: post.totalLikes.toNumber(),
           };
         });
 
@@ -74,6 +78,7 @@ const App = () => {
         ...prevState,
         {
           address: from,
+          rawTimestamp: timestamp,
           timestamp: new Date(timestamp * 1000),
           message: message,
         },
@@ -84,7 +89,6 @@ const App = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-
       postingContract = new ethers.Contract(
         contractAddress,
         contractABI,
@@ -157,6 +161,36 @@ const App = () => {
   };
 
   /**
+   * Like!ボタンを押した時のイベントハンドラ
+   */
+    const likeButton = async (postId) => {
+    try {
+      const { ethereum } = window;
+      if (!ethereum) {
+        alert("Ethereum object doesn't exist!");
+        return;
+      }
+      // コントラクトのインスタンスを生成。コントラクトへの接続を行う
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const postingContract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        signer
+      );
+      // コントラクタにいいねの数を書き込む
+      const likedTxn = await postingContract.updateTotalLikes(postId, {
+        gasLimit: 300000,
+      });
+      console.log("[likeButton] Mining...", likedTxn.hash);
+      await likedTxn.wait();
+      console.log("[likeButton] Mined -- ", likedTxn.hash);
+    } catch(error) {
+      console.log(error);
+    }
+  };
+
+  /**
    * postの回数をカウントする関数
    * - provider: (=MetaMask)
    *   ユーザーは、providerを介してブロックチェーン上のイーサリアムノードに接続する
@@ -185,9 +219,9 @@ const App = () => {
         const postTxn = await postingContract.post(messageValue, {
           gasLimit: 300000,
         });
-        console.log("Mining...", postTxn.hash);
+        console.log("[post] Mining...", postTxn.hash);
         await postTxn.wait();
-        console.log("Mined -- ", postTxn.hash);
+        console.log("[post] Mined -- ", postTxn.hash);
         count = await postingContract.getTotalPosts();
         console.log("Retrieved total post count...", count.toNumber());
 
@@ -278,9 +312,12 @@ const App = () => {
                       padding: "8px",
                     }}
                   >
-                    <div>Address: {post.address}</div>
+                    <div>Address: {post.user}</div>
                     <div>Time: {post.timestamp.toUTCString()}</div>
                     <div>Message: {post.message}</div>
+                    {/* いいねボタンを表示 */}
+                  <div className="likeButton" onClick={() => likeButton(post.id)}>Like!</div>
+                  <div className="counter">{post.allLikes}</div>
                   </div>
                 );
               })
