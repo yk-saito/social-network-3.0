@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
 import abi from './utils/Posting.json';
 import './App.css';
-import List from './List.js';
-import SortButton from './SortButton.js';
+import PostList from './components/PostList.js';
+import SortButton from './components/SortButton.js';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
@@ -25,24 +25,28 @@ const App = () => {
   /* ソートの条件を保存する */
   const [sort, setSort] = useState({key: "timestamp", order: -1});
 
+  /* ソートボタンで使用するプロパティ名を設定 */
+  const KEYS = ['timestamp', 'allLikes'];
+
   const getAllPosts = async () => {
+    /* ユーザーが認証可能なウォレットアドレスを持っているか確認 */
     const { ethereum } = window;
 
     try {
       if (ethereum) {
-        // provider(=MetaMask)を取得。フロントがこれを介してイーサリアムノードに接続
+        /* provider(=MetaMask)を取得。フロントがこれを介してイーサリアムノードに接続 */
         const provider = new ethers.providers.Web3Provider(ethereum);
-        // ユーザーのウォレットアドレス(=signer)を取得
+        /* ユーザーのウォレットアドレス(=signer)を取得 */
         const signer = provider.getSigner();
-        // コントラクトのインスタンスを生成。コントラクトへの接続を行う
+        /* コントラクトのインスタンスを生成。コントラクトへの接続を行う */
         const postingContract = new ethers.Contract(
           contractAddress,
           contractABI,
           signer
         );
-        // コントラクトからメソッドを呼び出す
+        /* コントラクトからメソッドを呼び出す */
         const posts = await postingContract.getAllPosts();
-        // UIで使用するデータを設定
+        /* UIで使用するデータを設定 */
         const postsCleaned = posts.map((post) => {
           console.log("raw timestamp: ", post.timestamp);
           return {
@@ -55,7 +59,7 @@ const App = () => {
           };
         });
 
-        // React Stateにデータを格納
+        /* React Stateにデータを格納 */
         setAllPosts(postsCleaned);
         console.log("Object key: ", Object.keys(allPosts[0]));
 
@@ -93,7 +97,7 @@ const App = () => {
       ]);
     };
 
-    // NewPostイベント発生時に、情報を受け取る
+    /* NewPostイベント発生時に、情報を受け取る */
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -102,20 +106,17 @@ const App = () => {
         contractABI,
         signer
       );
-      // イベントリスナを呼び出す
+      /* イベントリスナを呼び出す */
       postingContract.on("NewPost", onNewPost);
     }
     return () => {
       if (postingContract) {
-        // イベントリスナを停止
+        /* イベントリスナを停止 */
         postingContract.off("NewPost", onNewPost);
       }
     };
   }, []);
 
-  /**
-   * window.ethereumにアクセスできることを確認（ウェブサイトを訪問したユーザーがMetaMaskを持っているか）
-   */
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
@@ -128,10 +129,7 @@ const App = () => {
 
       /**
        * 確認したウォレットへ、アクセスが許可されているか確認
-       * - eth_accounts
-       *   空の配列、または単一のアカウントアドレスを含む配列を返す特別なメソッド
-       * - accounts
-       *   ユーザーが複数のウォレットアカウントを持っていることも加味
+       *  eth_accounts: 空の配列、または単一のアカウントアドレスを含む配列を返す特別なメソッド
        */
       const accounts = await ethereum.request({ method: "eth_accounts" });
       if (accounts.length !== 0) {
@@ -147,21 +145,17 @@ const App = () => {
     }
   };
 
-  /**
-   * connectWalletメソッドを実装
-   */
   const connectWallet = async () => {
     try {
-      // ユーザーが認証可能なウォレットアドレスを持っているか確認
       const { ethereum } = window;
       if (!ethereum) {
         alert("Get MetaMask!");
         return;
       }
-      // ユーザーに対してウォレットへのアクセス許可を求める
+      /* ユーザーに対してウォレットへのアクセス許可を求める */
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       console.log("Connected: ", accounts[0]);
-      // 許可されたらセット
+      /* 許可されたらセット */
       setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
@@ -173,7 +167,6 @@ const App = () => {
    */
   const post = async () => {
     try {
-      // ユーザーがMetaMaskを持っているか確認
       const { ethereum } = window;
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -189,7 +182,7 @@ const App = () => {
         let contractBalance = await provider.getBalance(postingContract.address);
         console.log("Contract balance:", ethers.utils.formatEther(contractBalance));
 
-        // コントラクタに投稿を書き込む
+        /* コントラクタに投稿を書き込む */
         const postTxn = await postingContract.post(messageValue, {
           gasLimit: 300000,
         });
@@ -202,7 +195,8 @@ const App = () => {
         let contractBalance_post = await provider.getBalance(
           postingContract.address
         );
-        // コントラクトの残高確認
+
+        /* コントラクトの残高確認 */
         if (contractBalance_post < contractBalance) {
           console.log("User won ETH!");
         } else {
@@ -220,12 +214,8 @@ const App = () => {
     }
   };
 
-  // ソートボタン
-  const KEYS = ['timestamp', 'allLikes'];
-
   /**
    * ソートの条件に沿って投稿を並べ替える
-   * @param {*} key
    */
   const handleSort = (key) => {
     console.log('clike: ' + key);
@@ -262,7 +252,7 @@ const App = () => {
   }, [sort, allPosts]);
 
   /**
-   * Like!ボタンを押した時のハンドラ
+   * Like!ボタンを押した時のハンドラ関数
    */
   const handleLike = async (postId) => {
     console.log("clike: " + postId);
@@ -272,7 +262,6 @@ const App = () => {
         alert("Ethereum object doesn't exist!");
         return;
       }
-      // コントラクトのインスタンスを生成。コントラクトへの接続を行う
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       const postingContract = new ethers.Contract(
@@ -280,7 +269,7 @@ const App = () => {
         contractABI,
         signer
       );
-      // コントラクタにいいねの数を書き込む
+      /* コントラクタにいいねの数を書き込む */
       const likedTxn = await postingContract.updateTotalLikes(postId, {
         gasLimit: 300000,
       });
@@ -292,45 +281,19 @@ const App = () => {
     }
   };
 
-  // Webページがロードされた時、以下の関数を実行
+  /* Webページがロードされた時、以下を実行 */
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
 
   return (
-    <div className="mainContainer">
-      <div className="dataContainer">
-        <div className="header">WELCOME!</div>
-
-        <div className="bio">
-        イーサリアムウォレットを接続して、メッセージを作成したら、ツブートしてください<span role="img" aria-label="shine">🪶</span>
-        </div>
-        <br />
-        {/* メッセージボックスを実装 */}
-        {
-          currentAccount && (
-            <textarea
-              name="messageArea"
-              placeholder="メッセージはこちら"
-              type="text"
-              id="message"
-              value={messageValue}
-              onChange={(e) => setMessageValue(e.target.value)}
-            />
-          )
-        }
-        {/* postボタンにpost関数を連動 */}
-        {
-          currentAccount && (
-            <button className="postButton" onClick={post}>
-              Tubuut
-            </button>
-          )
-        }
-        {/* ウォレットコネクトボタンを実装 */}
+    <div>
+      <header className="headerContainer">
+        <div className="headerButton">
+        {/* ウォレットコネクトボタンを表示 */}
         {
           !currentAccount && (
-            <button className="postButton" onClick={connectWallet}>
+            <button onClick={connectWallet}>
               Connect Wallet
             </button>
           )
@@ -342,6 +305,53 @@ const App = () => {
             </button>
           )
         }
+        </div>
+      </header>
+    <div className="mainContainer">
+      <div className="dataContainer">
+        {
+          !currentAccount && (
+          <div>
+            <div className="mainHeader">
+              WELCOME!
+            </div>
+            <div className="bio">
+              Please connect wallet.
+            </div>
+          </div>
+        )}
+        {
+          currentAccount && (
+          <div>
+            <div className="bio">
+              Create a message and "Tubuut" it <span role="img" aria-label="shine">🪶</span>
+            </div>
+          </div>
+          )}
+        <br />
+        {/* メッセージボックスを表示 */}
+        {
+          currentAccount && (
+            <textarea
+              name="messageArea"
+              placeholder="message"
+              type="text"
+              id="message"
+              value={messageValue}
+              onChange={(e) => setMessageValue(e.target.value)}
+            />
+          )
+        }
+        <div className="postFooter">
+        {/* postボタンにpost関数を連動 */}
+        {
+          currentAccount && (
+            <button className="postButton" onClick={post}>
+              Tubuut
+            </button>
+          )
+        }
+        </div>
         {/* ソートボタンを表示 */}
         {
           currentAccount && (
@@ -362,19 +372,20 @@ const App = () => {
         {/* 履歴を表示する */}
         {
           currentAccount && (
-            <div className="listContainer">
+            <ul className="listPosts">
             {
               sortedPosts.map((post) => (
-                <List
+                <PostList
                   key={post.id}
                   post={post}
                   handleLike={handleLike}/>
               ))
             }
-            </div>
+            </ul>
           )
         }
       </div>
+    </div>
     </div>
   );
 };

@@ -1,74 +1,108 @@
+.headerContainer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.headerButton {
+  margin-right: 16px;
+}
+
+.headerButton button {
+  background-color: #4B0082;
+  border: 0;
+  border-radius: 5px;
+  color: #fafafa;
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 16px;
+  padding: 10px;
+}
+
+.headerButton button:hover {
+  background-color:#E6E6FA;
+  color: black;
+}
+
 .mainContainer {
   display: flex;
   justify-content: center;
-  width: 100%;
   margin-top: 64px;
+  width: 100%;
 }
 
 .dataContainer {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 600px;
+  max-width: 700px;
 }
 
-.header {
-  text-align: center;
+.mainHeader {
   font-size: 32px;
   font-weight: 600;
+  text-align: center;
 }
 
 .bio {
-  text-align: center;
   color: gray;
   margin-top: 16px;
+  text-align: center;
+}
+
+.postFooter{
+  display: flex;
+  justify-content: flex-end;
 }
 
 .postButton {
+  background: #bbbcde;
+  border: 0;
+  border-radius: 5px;
   cursor: pointer;
   margin-top: 16px;
   padding: 8px;
-  border: 0;
-  border-radius: 5px;
+}
 
+.postButton:hover {
+  background:#E6E6FA;
 }
 
 .sortButton {
   margin: 0 0 16px;
 }
 
-.sortButton button{
-  position: relative;
+.sortButton button {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
   display: inline-block;
   margin: 0 8px 8px 0;
   padding: .4em 2em .4em 1.2em;
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  position: relative;
   text-align: center;
-  cursor: pointer;
   transition: .3s ease;
 }
 
-.sortButton button::after{
-  position: absolute;
-  top: calc(50% - 5px);
-  right: 8px;
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
+.sortButton button::after {
   border-top: 2px solid #ccc;
   border-right: 2px solid #ccc;
+  content: '';
+  display: block;
+  height: 8px;
+  position: absolute;
+  right: 8px;
+  top: calc(50% - 5px);
   transform: rotate(135deg);
   transition: .3s ease;
+  width: 8px;
 }
 
-.sortButton button:focus::after{
+.sortButton button:focus::after {
   border-color: #666666;
 }
 
-.sortButton button:focus.asc::after{
+.sortButton button:focus.asc::after {
   top: calc(50% - 3px);
   transform: rotate(315deg);
 }
@@ -78,67 +112,70 @@
   transform: rotate(135deg);
 }
 
-.listContainer {
-  display: flex;
+.listPosts {
   flex-direction: column;
   justify-content: center;
-  max-width: 600px;
+  padding: 0.5em;
+  width: 100%;
 }
 
-.listPropaty {
-  color: #ccc;
-  font-size: .9em;
+.listPosts span {
+  color: gray;
+  margin-right: 15px;
 }
 
-.listInfo{
-  color: #ccc;
-  font-size: .0.5em;
+.listPosts li {
+  border-bottom: 1px solid #eee;
+  list-style: none;
+  padding: 1em;
 }
 
-/*
-  "Like!" Button
-*/
-.likeButton{
-  background:#3b5998;
-  padding:0px 10px;
-  border-radius:2px;
-  color:#fff;
-  cursor:pointer;
-  float:left;
-  height:25px;
-  line-height:25px;
+.listPosts p {
+  display: inline-block;
 }
 
-.likeButton:hover{
-  background:#444;
+.listMessage {
+  white-space: pre-wrap;
 }
 
-/*
-  Display number of likes
-*/
-.counter{
-  background:#fafafa;
-  border:1px solid #aaa;
-  float:left;
-  padding:0px 8px;
-  border-radius:2px;
-  margin-left:8px;
+.likeButton {
+  background-color: #4B0082;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  margin-top: 16px;
+  padding: 8px;
+}
+
+.likeButton:hover {
+  background-color:#E6E6FA;
+  color: black;
+}
+
+.likeCounter {
+  background-color: #fafafa;
+  border: 1px solid #aaa;
+  border-radius: 2px;
   height: 23px;
-  line-height:23px;
+  line-height: 23px;
+  margin-top: 20px;
+  margin-left: 8px;
+  padding: 0px 8px;
 }
 
-.counter:before{
+.likeCounter:before {
+  background-color:#fafafa;
+  border-bottom:1px solid #aaa;
+  border-left:1px solid #aaa;
+  border-right:10px;
+  content:' ';
   display:block;
   float:left;
-  content:' ';
-  width:6px;
   height:6px;
-  background:#fafafa;
   margin-left:-12px;
-  border-right:10px;
+  margin-top:9px;
   transform:rotate(45deg);
+  width:6px;
   -webkit-transform:rotate(45deg);
-  margin-top:8px;
-  border-left:1px solid #aaa;
-  border-bottom:1px solid #aaa;
 }
