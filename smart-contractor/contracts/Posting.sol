@@ -80,7 +80,7 @@ contract Posting {
     /**
         いいねの数を更新する
      */
-    function updateTotalLikes(uint256 id) external {
+    function updateTotalLikes(uint256 id) public {
         // ユーザーが既にいいねを押していたら、いいねを解除する
         if (likedUsers[id][msg.sender] == msg.sender) {
             posts[id].totalLikes -= 1;

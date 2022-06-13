@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
 import abi from './utils/Posting.json';
 import './App.css';
+import List from './List.js';
+import SortButton from './SortButton.js';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
-  const contractAddress = "0xaD6117663F9B0Fc629E5AB43791fe915564fa295";
+  const contractAddress = "0x48EAc03d91857adA0b97211Fc88a65bBA9e98E23";
 
   /* ABIの内容を参照 */
   const contractABI = abi.abi;
@@ -18,6 +20,9 @@ const App = () => {
   const [messageValue, setMessageValue] = useState("");
   /* 全ての投稿(posts)を保存する */
   const [allPosts, setAllPosts] = useState([]);
+
+  /* ソートの条件を保存する */
+  const [sort, setSort] = useState({key: "timestamp", order: -1});
 
   const getAllPosts = async () => {
     const { ethereum } = window;
@@ -51,6 +56,8 @@ const App = () => {
 
         // React Stateにデータを格納
         setAllPosts(postsCleaned);
+        console.log("Object key: ", Object.keys(allPosts[0]));
+
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -161,41 +168,7 @@ const App = () => {
   };
 
   /**
-   * Like!ボタンを押した時のイベントハンドラ
-   */
-    const likeButton = async (postId) => {
-    try {
-      const { ethereum } = window;
-      if (!ethereum) {
-        alert("Ethereum object doesn't exist!");
-        return;
-      }
-      // コントラクトのインスタンスを生成。コントラクトへの接続を行う
-      const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
-      const postingContract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        signer
-      );
-      // コントラクタにいいねの数を書き込む
-      const likedTxn = await postingContract.updateTotalLikes(postId, {
-        gasLimit: 300000,
-      });
-      console.log("[likeButton] Mining...", likedTxn.hash);
-      await likedTxn.wait();
-      console.log("[likeButton] Mined -- ", likedTxn.hash);
-    } catch(error) {
-      console.log(error);
-    }
-  };
-
-  /**
-   * postの回数をカウントする関数
-   * - provider: (=MetaMask)
-   *   ユーザーは、providerを介してブロックチェーン上のイーサリアムノードに接続する
-   * - signer
-   *   ユーザーのウォレットアドレスを抽象化したもの。これを使用して、署名つきトランザクションを送信
+   * 投稿をコンストラクタに書き込む
    */
   const post = async () => {
     try {
@@ -242,6 +215,78 @@ const App = () => {
         console.log("Ethereum object doesn't exist!");
       }
     } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ソートボタン
+  const KEYS = ['timestamp', 'allLikes'];
+
+  /**
+   * ソートの条件に沿って投稿を並べ替える
+   * @param {*} key
+   */
+  const handleSort = (key) => {
+    console.log('clike: ' + key);
+    if (sort.key === key) {
+      setSort({ ...sort, order: -sort.order });
+    } else {
+      setSort({
+        key: key,
+        order: 1
+      })
+    }
+  };
+
+  /**
+   * ソート後のデータを格納する
+   */
+  let sortedPosts = useMemo(() => {
+    let _sortedPosts = allPosts;
+    if (sort.key) {
+      _sortedPosts = _sortedPosts.sort((a, b) => {
+        a = a[sort.key];
+        b = b[sort.key];
+
+        if (a === b) {
+          return 0;
+        }
+        if (a > b) {
+          return 1 * sort.order;
+        }
+        return -1 * sort.order;
+      });
+    }
+    return _sortedPosts;
+  }, [sort, allPosts]);
+
+  /**
+   * Like!ボタンを押した時のハンドラ
+   */
+  const handleLike = async (postId) => {
+    console.log("clike: " + postId);
+    try {
+      const { ethereum } = window;
+      if (!ethereum) {
+        alert("Ethereum object doesn't exist!");
+        return;
+      }
+      // コントラクトのインスタンスを生成。コントラクトへの接続を行う
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const postingContract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        signer
+      );
+      // コントラクタにいいねの数を書き込む
+      const likedTxn = await postingContract.updateTotalLikes(postId, {
+        gasLimit: 300000,
+      });
+      console.log("[likeButton] Mining...", likedTxn.hash);
+      await likedTxn.wait();
+      console.log("[likeButton] Mined -- ", likedTxn.hash);
+    } catch(error) {
       console.log(error);
     }
   };
@@ -296,32 +341,31 @@ const App = () => {
             </button>
           )
         }
+        {/* ソートボタンを表示 */}
+        <div className="sortButton">
+          <h2>Sort by</h2>
+          {
+            KEYS.map((key, index) => (
+              <SortButton
+                key={index}
+                button={key}
+                handleSort={handleSort}
+                sort={sort} />
+            ))
+          }
+        </div>
+        <div className="listContainer">
         {/* 履歴を表示する */}
         {
           currentAccount &&
-            allPosts
-              .slice(0)
-              .reverse()
-              .map((post, index) => {
-                return (
-                  <div
-                    key={index}
-                    style={{
-                      backgroundColor: "#F8F8FF",
-                      marginTop: "16px",
-                      padding: "8px",
-                    }}
-                  >
-                    <div>Address: {post.user}</div>
-                    <div>Time: {post.timestamp.toUTCString()}</div>
-                    <div>Message: {post.message}</div>
-                    {/* いいねボタンを表示 */}
-                  <div className="likeButton" onClick={() => likeButton(post.id)}>Like!</div>
-                  <div className="counter">{post.allLikes}</div>
-                  </div>
-                );
-              })
+            sortedPosts.map((post) => (
+              <List
+                key={post.id}
+                post={post}
+                handleLike={handleLike}/>
+            ))
         }
+        </div>
       </div>
     </div>
   );

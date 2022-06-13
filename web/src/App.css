@@ -33,6 +33,71 @@
 
 }
 
+.sortButton {
+  margin: 0 0 16px;
+}
+
+.sortButton button{
+  position: relative;
+  display: inline-block;
+  margin: 0 8px 8px 0;
+  padding: .4em 2em .4em 1.2em;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: .3s ease;
+}
+
+.sortButton button::after{
+  position: absolute;
+  top: calc(50% - 5px);
+  right: 8px;
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #ccc;
+  border-right: 2px solid #ccc;
+  transform: rotate(135deg);
+  transition: .3s ease;
+}
+
+.sortButton button:focus::after{
+  border-color: #666666;
+}
+
+.sortButton button:focus.asc::after{
+  top: calc(50% - 3px);
+  transform: rotate(315deg);
+}
+
+.sortButton button:focus.desc::after {
+  top: calc(50% - 5px);
+  transform: rotate(135deg);
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.listPropaty {
+  color: #ccc;
+  font-size: .9em;
+}
+
+.listInfo{
+  color: #ccc;
+  font-size: .0.5em;
+}
+
+/*
+  "Like!" Button
+*/
 .likeButton{
   background:#3b5998;
   padding:0px 10px;
@@ -43,9 +108,14 @@
   height:25px;
   line-height:25px;
 }
+
 .likeButton:hover{
   background:#444;
 }
+
+/*
+  Display number of likes
+*/
 .counter{
   background:#fafafa;
   border:1px solid #aaa;
@@ -56,6 +126,7 @@
   height: 23px;
   line-height:23px;
 }
+
 .counter:before{
   display:block;
   float:left;
