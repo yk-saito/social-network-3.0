@@ -7,7 +7,7 @@ import SortButton from './SortButton.js';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
-  const contractAddress = "0x48EAc03d91857adA0b97211Fc88a65bBA9e98E23";
+  const contractAddress = "0x64696789dA5aAA8340130DD1EBa94b9dbe578c8f";
 
   /* ABIの内容を参照 */
   const contractABI = abi.abi;
@@ -16,9 +16,10 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
   console.log("currentAccount: ", currentAccount);
 
-  /* ユーザーの投稿(tubuut)を保存する */
+  /* ユーザーの投稿を保存する */
   const [messageValue, setMessageValue] = useState("");
-  /* 全ての投稿(posts)を保存する */
+
+  /* 全ての投稿を保存する */
   const [allPosts, setAllPosts] = useState([]);
 
   /* ソートの条件を保存する */
@@ -342,30 +343,37 @@ const App = () => {
           )
         }
         {/* ソートボタンを表示 */}
-        <div className="sortButton">
-          <h2>Sort by</h2>
-          {
-            KEYS.map((key, index) => (
-              <SortButton
-                key={index}
-                button={key}
-                handleSort={handleSort}
-                sort={sort} />
-            ))
-          }
-        </div>
-        <div className="listContainer">
+        {
+          currentAccount && (
+            <div className="sortButton">
+              <h2>Sort by</h2>
+              {
+                KEYS.map((key, index) => (
+                  <SortButton
+                    key={index}
+                    button={key}
+                    handleSort={handleSort}
+                    sort={sort} />
+                ))
+              }
+            </div>
+          )
+        }
         {/* 履歴を表示する */}
         {
-          currentAccount &&
-            sortedPosts.map((post) => (
-              <List
-                key={post.id}
-                post={post}
-                handleLike={handleLike}/>
-            ))
+          currentAccount && (
+            <div className="listContainer">
+            {
+              sortedPosts.map((post) => (
+                <List
+                  key={post.id}
+                  post={post}
+                  handleLike={handleLike}/>
+              ))
+            }
+            </div>
+          )
         }
-        </div>
       </div>
     </div>
   );
