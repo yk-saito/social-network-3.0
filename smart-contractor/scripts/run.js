@@ -17,13 +17,22 @@ const main = async () => {
     );
 
     /*
-     * 2回 waves を送るシミュレーションを行う
+     * 5回 waves を送るシミュレーションを行う
      */
     const postTxn = await postingContract.post("Hello #1");
     await postTxn.wait();
 
     const postTxn2 = await postingContract.post("Hello #2");
     await postTxn2.wait();
+
+    const postTxn3 = await postingContract.post("Hello #3");
+    await postTxn3.wait();
+
+    const postTxn4 = await postingContract.post("Hello #4");
+    await postTxn4.wait();
+
+    const postTxn5 = await postingContract.post("Hello #5");
+    await postTxn5.wait();
 
     // Postした後のコントラクトの残高を確認(残高 - 0.0001ETH)
     contractBalance = await hre.ethers.provider.getBalance(postingContract.address);
@@ -32,6 +41,7 @@ const main = async () => {
         hre.ethers.utils.formatEther(contractBalance)
     );
 
+    // いいねの数を更新してみる
     let allPosts = await postingContract.getAllPosts();
     console.log(allPosts);
 

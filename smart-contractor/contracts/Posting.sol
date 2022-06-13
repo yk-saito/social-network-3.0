@@ -19,9 +19,7 @@ contract Posting {
 
     uint256 totalPosts;
     uint256 private seed; // 乱数生成のシード
-    mapping(address => uint256) public lastPostedAt; // ユーザーアドレスとタイムスタンプをマッピング
-
-    mapping(uint256 => mapping(address => address)) public likedUsers; //postIdといいねしたユーザーのアドレスをマッピング
+    mapping(uint256 => mapping(address => address)) public likedUsers; //PostのIdと、いいねを押したユーザーのアドレスをマッピング
 
     constructor() payable {
         console.log("PostPortal - Smart Contract!");
@@ -32,20 +30,9 @@ contract Posting {
     /**
      * postとメッセージを受け取り、配列に格納
      *
-     * msg.sender: Wallet address of the function caller
+     * msg.sender: post関数を読んだユーザーのウォレットアドレス
      */
-
-    // スマートコントラクトに含まれる関数を呼び出すには、ユーザーは有効なウォレットを接続する必要がある。
-    // -> msg.senderは、誰が関数を呼び出したかを正確に把握し、ユーザー認証を行なっている！
     function post(string memory _message) public {
-        // 現在ユーザーが投稿している時刻と、前回の投稿時刻が15分以上離れていることを確認
-        require(
-            lastPostedAt[msg.sender] + 0 minutes < block.timestamp,
-            "Wait 1m"
-        );
-        // ユーザーの現在のタイムスタンプを更新
-        lastPostedAt[msg.sender] = block.timestamp;
-
         // 投稿を配列に格納
         posts.push(Post(totalPosts, msg.sender, _message, block.timestamp, 0));
 
@@ -56,9 +43,9 @@ contract Posting {
         seed = (block.difficulty + block.timestamp + seed) % 100;
         console.log("Random # generated: %d", seed);
 
-        // ユーザーがETHを獲得する確率を50%に設定
-        if (seed <= 50) {
-            // console.log("%s won!", msg.sender);
+        // ユーザーがETHを獲得する確率を20%に設定
+        if (seed <= 20) {
+            console.log("%s won!", msg.sender);
 
             // 投稿してくれたユーザーに0.0001ETHを送る
             uint256 prizeAmount = 0.0001 ether;
@@ -78,7 +65,7 @@ contract Posting {
     }
 
     /**
-        いいねの数を更新する
+     * いいねの数を更新する
      */
     function updateTotalLikes(uint256 id) public {
         // ユーザーが既にいいねを押していたら、いいねを解除する
@@ -93,6 +80,9 @@ contract Posting {
         }
     }
 
+    /**
+     * 全ての投稿を返す
+     */
     function getAllPosts() public view returns (Post[] memory) {
         Post[] memory allPosts = new Post[](totalPosts);
 
@@ -102,6 +92,9 @@ contract Posting {
         return allPosts;
     }
 
+    /**
+     * 投稿数を返す
+     */
     function getTotalPosts() public view returns (uint256) {
         console.log("total posts: %d", totalPosts);
         return totalPosts;
