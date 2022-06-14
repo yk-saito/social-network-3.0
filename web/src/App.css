@@ -148,6 +148,9 @@
 
 /* いいね機能
 ====================================*/
+.likeContainer{
+  display: flex;
+}
 /* --- いいねボタン --- */
 .likeButton {
   background-color: #4B0082;
@@ -177,17 +180,16 @@
 }
 
 .likeCounter:before {
-  background-color:#fafafa;
-  border-bottom:1px solid #aaa;
-  border-left:1px solid #aaa;
-  border-right:10px;
-  content:' ';
-  display:block;
-  float:left;
-  height:6px;
-  margin-left:-12px;
-  margin-top:9px;
-  transform:rotate(45deg);
-  width:6px;
-  -webkit-transform:rotate(45deg);
+  background-color: #fafafa;
+  border-bottom: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-right: 10px;
+  content: ' ';
+  float: left;
+  height: 6px;
+  margin-left: -12px;
+  margin-top: 9px;
+  transform: rotate(45deg);
+  width: 6px;
+  -webkit-transform: rotate(45deg);
 }

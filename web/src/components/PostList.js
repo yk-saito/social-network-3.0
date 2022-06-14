@@ -17,14 +17,16 @@ const PostList = ( {post, handleLike} ) => {
         {post.message}
       </p>
       <br />
-      {/* いいねボタンを表示 */}
-      <p>
-        <button className="likeButton" onClick={() => handleLike(post.id)}>Like!</button>
-      </p>
-      {/* いいねの数を表示 */}
-      <p className="likeCounter">
-        {post.allLikes}
-      </p>
+      {/* いいね機能を表示 */}
+      <div className="likeContainer">
+        <div className="likeButton" onClick={() => handleLike(post.id)}>
+          Like!
+        </div>
+        {/* いいねの数を表示 */}
+        <div className="likeCounter">
+          {post.allLikes}
+        </div>
+      </div>
     </li>
   );
 };
