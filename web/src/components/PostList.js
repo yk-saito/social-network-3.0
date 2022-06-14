@@ -19,7 +19,7 @@ const PostList = ( {post, handleLike} ) => {
       <br />
       {/* いいねボタンを表示 */}
       <p>
-        <button className="likeButton" onClick={() => handleLike(post.id)}>Like!</button>
+        <button onClick={() => handleLike(post.id)}>Like!</button>
       </p>
       {/* いいねの数を表示 */}
       <p className="likeCounter">
