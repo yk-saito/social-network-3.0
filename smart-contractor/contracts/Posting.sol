@@ -28,12 +28,9 @@ contract Posting {
     }
 
     /**
-     * postとメッセージを受け取り、配列に格納
-     *
-     * msg.sender: post関数を読んだユーザーのウォレットアドレス
+     * 投稿を受け取り、配列に格納
      */
     function post(string memory _message) public {
-        // 投稿を配列に格納
         posts.push(Post(totalPosts, msg.sender, _message, block.timestamp, 0));
 
         totalPosts += 1;

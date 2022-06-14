@@ -12,8 +12,6 @@ const main = async () => {
     await postingContract.deployed();
 
     console.log("Contract deployed to: ", postingContract.address);
-
-
 };
 
 const runMain = async () => {
