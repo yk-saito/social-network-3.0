@@ -18,9 +18,7 @@ const PostList = ( {post, handleLike} ) => {
       </p>
       <br />
       {/* いいねボタンを表示 */}
-      <p>
-        <button onClick={() => handleLike(post.id)}>Like!</button>
-      </p>
+      <button onClick={() => handleLike(post.id)}>Like!</button>
       {/* いいねの数を表示 */}
       <p className="likeCounter">
         {post.allLikes}
