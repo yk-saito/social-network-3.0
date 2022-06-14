@@ -1,20 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
-import abi from './utils/Posting.json';
 import './App.css';
+import abi from './utils/Posting.json';
 import PostList from './components/PostList.js';
 import SortButton from './components/SortButton.js';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
-  const contractAddress = "0x64696789dA5aAA8340130DD1EBa94b9dbe578c8f";
+  const contractAddress = "0x71c40f3c5d62EfF2bBd5AF8E635F8cf9C6f76e8f";
 
   /* ABIの内容を参照 */
   const contractABI = abi.abi;
 
   /* ユーザーのパブリックウォレットを保存する */
   const [currentAccount, setCurrentAccount] = useState("");
-  console.log("currentAccount: ", currentAccount);
+  // console.log("currentAccount: ", currentAccount);
 
   /* ユーザーの投稿を保存する */
   const [messageValue, setMessageValue] = useState("");
@@ -48,7 +48,6 @@ const App = () => {
         const posts = await postingContract.getAllPosts();
         /* UIで使用するデータを設定 */
         const postsCleaned = posts.map((post) => {
-          console.log("raw timestamp: ", post.timestamp);
           return {
             id: post.id,
             user: post.user,
@@ -61,8 +60,6 @@ const App = () => {
 
         /* React Stateにデータを格納 */
         setAllPosts(postsCleaned);
-        console.log("Object key: ", Object.keys(allPosts[0]));
-
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -115,7 +112,7 @@ const App = () => {
         postingContract.off("NewPost", onNewPost);
       }
     };
-  }, []);
+  }, [contractABI]);
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -176,9 +173,6 @@ const App = () => {
           contractABI,
           signer
         );
-        let count = await postingContract.getTotalPosts();
-        console.log("Retrieved total post count...", count.toNumber());
-
         let contractBalance = await provider.getBalance(postingContract.address);
         console.log("Contract balance:", ethers.utils.formatEther(contractBalance));
 
@@ -189,12 +183,8 @@ const App = () => {
         console.log("[post] Mining...", postTxn.hash);
         await postTxn.wait();
         console.log("[post] Mined -- ", postTxn.hash);
-        count = await postingContract.getTotalPosts();
-        console.log("Retrieved total post count...", count.toNumber());
 
-        let contractBalance_post = await provider.getBalance(
-          postingContract.address
-        );
+        let contractBalance_post = await provider.getBalance(postingContract.address);
 
         /* コントラクトの残高確認 */
         if (contractBalance_post < contractBalance) {
@@ -231,6 +221,7 @@ const App = () => {
 
   /**
    * ソート後のデータを格納する
+   *  配列(allPosts)に変更があった場合のみ実行される
    */
   let sortedPosts = useMemo(() => {
     let _sortedPosts = allPosts;
@@ -255,7 +246,7 @@ const App = () => {
    * Like!ボタンを押した時のハンドラ関数
    */
   const handleLike = async (postId) => {
-    console.log("clike: " + postId);
+    console.log("click postID: " + postId);
     try {
       const { ethereum } = window;
       if (!ethereum) {
@@ -343,7 +334,7 @@ const App = () => {
           )
         }
         <div className="postFooter">
-        {/* postボタンにpost関数を連動 */}
+        {/* 投稿を送信するボタンを表示 */}
         {
           currentAccount && (
             <button className="postButton" onClick={post}>
@@ -355,13 +346,13 @@ const App = () => {
         {/* ソートボタンを表示 */}
         {
           currentAccount && (
-            <div className="sortButton">
+            <div key={currentAccount} className="sortButton">
               <h2>Sort by</h2>
               {
-                KEYS.map((key, index) => (
+                KEYS.map((sortKey) => (
                   <SortButton
-                    key={index}
-                    button={key}
+                    key={sortKey.toString()}
+                    button={sortKey}
                     handleSort={handleSort}
                     sort={sort} />
                 ))
@@ -369,10 +360,10 @@ const App = () => {
             </div>
           )
         }
-        {/* 履歴を表示する */}
+        {/* 全ての投稿を表示する */}
         {
           currentAccount && (
-            <ul className="listPosts">
+            <ul className="postList">
             {
               sortedPosts.map((post) => (
                 <PostList
