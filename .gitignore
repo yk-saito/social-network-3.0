@@ -1,0 +1,13 @@
+# yarn
+.yarn/*
+!.yarn/plugins
+!.yarn/releases
+
+# debug
+**/yarn-error.log*
+
+# dependencies
+**/node_modules
+
+# misc
+**/.DS_Store

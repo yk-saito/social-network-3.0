@@ -1,0 +1,13 @@
+{
+  "name": "social-network-3.0",
+  "version": "1.0.0",
+  "packageManager": "yarn@3.6.4",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "contract": "yarn workspaces contract",
+    "client": "yarn workspaces client"
+  }
+}
