@@ -1,29 +1,29 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
+import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
-import abi from './utils/Posting.json';
 import PostList from './components/PostList.js';
 import SortButton from './components/SortButton.js';
+import PostingArtifact from './artifacts/contracts/Posting.sol/Posting.json';
 
 const App = () => {
   /* デプロイされたコントラクトのアドレスを保持する */
-  const contractAddress = "0x71c40f3c5d62EfF2bBd5AF8E635F8cf9C6f76e8f";
+  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
   /* ABIの内容を参照 */
-  const contractABI = abi.abi;
+  const contractABI = PostingArtifact.abi;
 
   /* ユーザーのパブリックウォレットを保存する */
-  const [currentAccount, setCurrentAccount] = useState("");
+  const [currentAccount, setCurrentAccount] = useState('');
   // console.log("currentAccount: ", currentAccount);
 
   /* ユーザーの投稿を保存する */
-  const [messageValue, setMessageValue] = useState("");
+  const [messageValue, setMessageValue] = useState('');
 
   /* 全ての投稿を保存する */
   const [allPosts, setAllPosts] = useState([]);
 
   /* ソートの条件を保存する */
-  const [sort, setSort] = useState({key: "timestamp", order: -1});
+  const [sort, setSort] = useState({ key: 'timestamp', order: -1 });
 
   /* ソートボタンで使用するプロパティ名を設定 */
   const KEYS = ['timestamp', 'allLikes'];
@@ -42,7 +42,7 @@ const App = () => {
         const postingContract = new ethers.Contract(
           contractAddress,
           contractABI,
-          signer
+          signer,
         );
         /* コントラクトからメソッドを呼び出す */
         const posts = await postingContract.getAllPosts();
@@ -82,7 +82,7 @@ const App = () => {
      * @param {string} message
      */
     const onNewPost = (from, timestamp, message) => {
-      console.log("NewPost", from, timestamp, message);
+      console.log('NewPost', from, timestamp, message);
       setAllPosts((prevState) => [
         ...prevState,
         {
@@ -101,15 +101,15 @@ const App = () => {
       postingContract = new ethers.Contract(
         contractAddress,
         contractABI,
-        signer
+        signer,
       );
       /* イベントリスナを呼び出す */
-      postingContract.on("NewPost", onNewPost);
+      postingContract.on('NewPost', onNewPost);
     }
     return () => {
       if (postingContract) {
         /* イベントリスナを停止 */
-        postingContract.off("NewPost", onNewPost);
+        postingContract.off('NewPost', onNewPost);
       }
     };
   }, [contractABI]);
@@ -118,27 +118,27 @@ const App = () => {
     try {
       const { ethereum } = window;
       if (!ethereum) {
-        console.log("Make sure you have MetaMask!");
+        console.log('Make sure you have MetaMask!');
         return;
       } else {
-        console.log("We have the ethereum object", ethereum);
+        console.log('We have the ethereum object', ethereum);
       }
 
       /**
        * 確認したウォレットへ、アクセスが許可されているか確認
        *  eth_accounts: 空の配列、または単一のアカウントアドレスを含む配列を返す特別なメソッド
        */
-      const accounts = await ethereum.request({ method: "eth_accounts" });
+      const accounts = await ethereum.request({ method: 'eth_accounts' });
       if (accounts.length !== 0) {
         const account = accounts[0];
-        console.log("Found an authorized account:", account);
+        console.log('Found an authorized account:', account);
         setCurrentAccount(account);
         getAllPosts();
       } else {
-        console.log("No authorized account found");
+        console.log('No authorized account found');
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -146,12 +146,14 @@ const App = () => {
     try {
       const { ethereum } = window;
       if (!ethereum) {
-        alert("Get MetaMask!");
+        alert('Get MetaMask!');
         return;
       }
       /* ユーザーに対してウォレットへのアクセス許可を求める */
-      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-      console.log("Connected: ", accounts[0]);
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+      console.log('Connected: ', accounts[0]);
       /* 許可されたらセット */
       setCurrentAccount(accounts[0]);
     } catch (error) {
@@ -171,30 +173,37 @@ const App = () => {
         const postingContract = new ethers.Contract(
           contractAddress,
           contractABI,
-          signer
+          signer,
         );
-        let contractBalance = await provider.getBalance(postingContract.address);
-        console.log("Contract balance:", ethers.utils.formatEther(contractBalance));
+        const contractBalance = await provider.getBalance(
+          postingContract.address,
+        );
+        console.log(
+          'Contract balance:',
+          ethers.utils.formatEther(contractBalance),
+        );
 
         /* コントラクタに投稿を書き込む */
         const postTxn = await postingContract.post(messageValue, {
           gasLimit: 300000,
         });
-        console.log("[post] Mining...", postTxn.hash);
+        console.log('[post] Mining...', postTxn.hash);
         await postTxn.wait();
-        console.log("[post] Mined -- ", postTxn.hash);
+        console.log('[post] Mined -- ', postTxn.hash);
 
-        let contractBalance_post = await provider.getBalance(postingContract.address);
+        const contractBalance_post = await provider.getBalance(
+          postingContract.address,
+        );
 
         /* コントラクトの残高確認 */
         if (contractBalance_post < contractBalance) {
-          console.log("User won ETH!");
+          console.log('User won ETH!');
         } else {
           console.log("User didn't win ETH.");
         }
         console.log(
-          "Contract balance after post:",
-          ethers.utils.formatEther(contractBalance_post)
+          'Contract balance after post:',
+          ethers.utils.formatEther(contractBalance_post),
         );
       } else {
         console.log("Ethereum object doesn't exist!");
@@ -208,14 +217,14 @@ const App = () => {
    * ソートの条件に沿って投稿を並べ替える
    */
   const handleSort = (key) => {
-    console.log('clike: ' + key);
+    console.log(`click:·${key}`);
     if (sort.key === key) {
       setSort({ ...sort, order: -sort.order });
     } else {
       setSort({
         key: key,
-        order: 1
-      })
+        order: 1,
+      });
     }
   };
 
@@ -223,17 +232,17 @@ const App = () => {
    * ソート後のデータを格納する
    *  配列(allPosts)に変更があった場合のみ実行される
    */
-  let sortedPosts = useMemo(() => {
+  const sortedPosts = useMemo(() => {
     let _sortedPosts = allPosts;
     if (sort.key) {
       _sortedPosts = _sortedPosts.sort((a, b) => {
-        a = a[sort.key];
-        b = b[sort.key];
+        const keyOfA = a[sort.key];
+        const keyOfB = b[sort.key];
 
-        if (a === b) {
+        if (keyOfA === keyOfB) {
           return 0;
         }
-        if (a > b) {
+        if (keyOfA > keyOfB) {
           return 1 * sort.order;
         }
         return -1 * sort.order;
@@ -246,7 +255,7 @@ const App = () => {
    * Like!ボタンを押した時のハンドラ関数
    */
   const handleLike = async (postId) => {
-    console.log("click postID: " + postId);
+    console.log(`click·postID:·${postId}`);
     try {
       const { ethereum } = window;
       if (!ethereum) {
@@ -258,16 +267,16 @@ const App = () => {
       const postingContract = new ethers.Contract(
         contractAddress,
         contractABI,
-        signer
+        signer,
       );
       /* コントラクタにいいねの数を書き込む */
       const likedTxn = await postingContract.updateTotalLikes(postId, {
         gasLimit: 300000,
       });
-      console.log("[likeButton] Mining...", likedTxn.hash);
+      console.log('[likeButton] Mining...', likedTxn.hash);
       await likedTxn.wait();
-      console.log("[likeButton] Mined -- ", likedTxn.hash);
-    } catch(error) {
+      console.log('[likeButton] Mined -- ', likedTxn.hash);
+    } catch (error) {
       console.log(error);
     }
   };
@@ -281,48 +290,44 @@ const App = () => {
     <div>
       <header className="headerContainer">
         <div className="headerButton">
-        {/* ウォレットコネクトボタンを表示 */}
-        {
-          !currentAccount && (
-            <button onClick={connectWallet}>
+          {/* ウォレットコネクトボタンを表示 */}
+          {!currentAccount && (
+            <button onClick={connectWallet} type="button">
               Connect Wallet
             </button>
-          )
-        }
-        {
-          currentAccount && (
-            <button className="postButton" onClick={connectWallet}>
+          )}
+          {currentAccount && (
+            <button
+              className="postButton"
+              type="button"
+              onClick={connectWallet}
+            >
               Wallet Connected
             </button>
-          )
-        }
+          )}
         </div>
       </header>
-    <div className="mainContainer">
-      <div className="dataContainer">
-        {
-          !currentAccount && (
-          <div>
-            <div className="mainHeader">
-              WELCOME!
+      <div className="mainContainer">
+        <div className="dataContainer">
+          {!currentAccount && (
+            <div>
+              <div className="mainHeader">WELCOME!</div>
+              <div className="bio">Please connect wallet.</div>
             </div>
-            <div className="bio">
-              Please connect wallet.
-            </div>
-          </div>
-        )}
-        {
-          currentAccount && (
-          <div>
-            <div className="bio">
-              Create a message and "Tubuut" it <span role="img" aria-label="shine">🪶</span>
-            </div>
-          </div>
           )}
-        <br />
-        {/* メッセージボックスを表示 */}
-        {
-          currentAccount && (
+          {currentAccount && (
+            <div>
+              <div className="bio">
+                Create a message and "Tubuut" it{' '}
+                <span role="img" aria-label="shine">
+                  🪶
+                </span>
+              </div>
+            </div>
+          )}
+          <br />
+          {/* メッセージボックスを表示 */}
+          {currentAccount && (
             <textarea
               name="messageArea"
               placeholder="message"
@@ -331,52 +336,39 @@ const App = () => {
               value={messageValue}
               onChange={(e) => setMessageValue(e.target.value)}
             />
-          )
-        }
-        <div className="postFooter">
-        {/* 投稿を送信するボタンを表示 */}
-        {
-          currentAccount && (
-            <button className="postButton" onClick={post}>
-              Tubuut
-            </button>
-          )
-        }
-        </div>
-        {/* ソートボタンを表示 */}
-        {
-          currentAccount && (
+          )}
+          <div className="postFooter">
+            {/* 投稿を送信するボタンを表示 */}
+            {currentAccount && (
+              <button className="postButton" type="button" onClick={post}>
+                Tubuut
+              </button>
+            )}
+          </div>
+          {/* ソートボタンを表示 */}
+          {currentAccount && (
             <div key={currentAccount} className="sortButton">
               <h2>Sort by</h2>
-              {
-                KEYS.map((sortKey) => (
-                  <SortButton
-                    key={sortKey.toString()}
-                    button={sortKey}
-                    handleSort={handleSort}
-                    sort={sort} />
-                ))
-              }
+              {KEYS.map((sortKey) => (
+                <SortButton
+                  key={sortKey.toString()}
+                  button={sortKey}
+                  handleSort={handleSort}
+                  sort={sort}
+                />
+              ))}
             </div>
-          )
-        }
-        {/* 全ての投稿を表示する */}
-        {
-          currentAccount && (
+          )}
+          {/* 全ての投稿を表示する */}
+          {currentAccount && (
             <ul className="postList">
-            {
-              sortedPosts.map((post) => (
-                <PostList
-                  key={post.id}
-                  post={post}
-                  handleLike={handleLike}/>
-              ))
-            }
+              {sortedPosts.map((post) => (
+                <PostList key={post.id} post={post} handleLike={handleLike} />
+              ))}
             </ul>
-          )
-        }
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 };
