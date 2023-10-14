@@ -2,7 +2,7 @@ require('@nomiclabs/hardhat-etherscan');
 require('@nomicfoundation/hardhat-toolbox');
 require('dotenv').config();
 
-const { ETHERSCAN_API_KEY, ALCHEMY_SEPOLIA_HTTP, PRIVATE_KEY } = process.env;
+const { ETHERSCAN_API_KEY, ALCHEMY_SEPOLIA_HTTPS, PRIVATE_KEY } = process.env;
 
 module.exports = {
   solidity: '0.8.18',
@@ -12,7 +12,7 @@ module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
     sepolia: {
-      url: ALCHEMY_SEPOLIA_HTTP || '',
+      url: ALCHEMY_SEPOLIA_HTTPS || '',
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
   },
