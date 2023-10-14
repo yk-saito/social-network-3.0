@@ -1,7 +1,7 @@
 const path = require('path');
 
 const buildFormatCommand = (filenames) =>
-  `yarn dlx @biomejs/biome format ${filenames
+  `biome format ${filenames
     .map((f) => path.relative(process.cwd(), f))
     .join(' ')} `;
 
