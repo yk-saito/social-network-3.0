@@ -7,7 +7,16 @@
     "packages/*"
   ],
   "scripts": {
-    "contract": "yarn workspaces contract",
-    "client": "yarn workspaces client"
+    "contract": "yarn workspace contract",
+    "client": "yarn workspace client",
+    "format": "biome format .",
+    "format:write": "biome format --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome check --apply .",
+    "solhint": "solhint --max-warnings 0 'packages/**/*.sol'"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.2.2",
+    "solhint": "^3.6.2"
   }
 }
