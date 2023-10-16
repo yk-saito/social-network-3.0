@@ -17,7 +17,8 @@ const PostList = ({ post, handleLike }) => {
       <br />
       {/* いいね機能を表示 */}
       <div className="likeContainer">
-        <div className="likeButton"
+        <div
+          className="likeButton"
           onClick={() => handleLike(post.id)}
           onKeyPress={() => handleLike(post.id)}
         >
