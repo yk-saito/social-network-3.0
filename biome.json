@@ -1,7 +1,11 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
-	"files": {
-    "ignore": ["**/artifacts/**"]
+  "files": {
+    "ignore": [
+      "**/artifacts/**",
+      "packages/contract/coverage.json",
+      "packages/contract/coverage/**"
+    ]
   },
   "formatter": {
     "enabled": true,
