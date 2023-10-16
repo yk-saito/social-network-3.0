@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.4;
-
-import "hardhat/console.sol";
+pragma solidity ^0.8.19;
 
 contract Posting {
-    event NewPost(address indexed from, uint256 timestamp, string message);
+    error InsufficientBalance(uint256 available, uint256 required);
+    error WithdrawalFailed();
+    event NewPost(address indexed from, uint256 timestamp, string message, uint256 randomNumber);
 
     struct Post {
         uint256 id;
@@ -15,50 +15,44 @@ contract Posting {
         uint256 totalLikes;
     }
 
-    Post[] posts;
+    Post[] private _posts;
 
-    uint256 totalPosts;
-    uint256 private seed; // 乱数生成のシード
+    uint256 private _totalPosts;
+    uint256 private _seed; // 乱数生成のシード
     mapping(uint256 => mapping(address => address)) public likedUsers; //PostのIdと、いいねを押したユーザーのアドレスをマッピング
 
     constructor() payable {
-        console.log("PostPortal - Smart Contract!");
-
-        seed = (block.difficulty + block.timestamp) % 100;
+        _seed = (block.difficulty + block.timestamp) % 100;
     }
 
     /**
      * 投稿を受け取り、配列に格納
      */
     function post(string memory _message) public {
-        posts.push(Post(totalPosts, msg.sender, _message, block.timestamp, 0));
+        _posts.push(Post(_totalPosts, msg.sender, _message, block.timestamp, 0));
 
-        totalPosts += 1;
-        console.log("%s postd w/ mwssage %s", msg.sender, _message);
+        _totalPosts += 1;
 
         // 乱数生成
-        seed = (block.difficulty + block.timestamp + seed) % 100;
-        console.log("Random # generated: %d", seed);
+        _seed = (block.difficulty + block.timestamp + _seed) % 100;
 
         // ユーザーがETHを獲得する確率を20%に設定
-        if (seed <= 20) {
-            console.log("%s won!", msg.sender);
-
-            // 投稿してくれたユーザーに0.0001ETHを送る
+        if (_seed <= 20) {
             uint256 prizeAmount = 0.0001 ether;
-            require(
-                // コントラクトが持つ資金が足りるかチェック
-                prizeAmount <= address(this).balance,
-                "Trying to withdraw more money than the contract has."
-            );
+
+            // コントラクトが持つ資金が足りるかチェック
+            if (prizeAmount > address(this).balance) {
+                revert InsufficientBalance(address(this).balance, prizeAmount);
+            }
+            // 投稿してくれたユーザーに0.0001ETHを送る
             (bool success, ) = (msg.sender).call{value: prizeAmount}("");
-            require(success, "Failed to withdraw money from contract.");
-        } else {
-            console.log("%s did not win.", msg.sender);
+            if (!success) {
+                revert WithdrawalFailed();
+            }
         }
 
         // フロントエンドにイベント発生を通知
-        emit NewPost(msg.sender, block.timestamp, _message);
+        emit NewPost(msg.sender, block.timestamp, _message, _seed);
     }
 
     /**
@@ -67,13 +61,11 @@ contract Posting {
     function updateTotalLikes(uint256 id) public {
         // ユーザーが既にいいねを押していたら、いいねを解除する
         if (likedUsers[id][msg.sender] == msg.sender) {
-            posts[id].totalLikes -= 1;
+            _posts[id].totalLikes -= 1;
             delete likedUsers[id][msg.sender];
-            console.log("decrement");
         } else {
-            posts[id].totalLikes += 1;
+            _posts[id].totalLikes += 1;
             likedUsers[id][msg.sender] = msg.sender;
-            console.log("increment");
         }
     }
 
@@ -81,10 +73,10 @@ contract Posting {
      * 全ての投稿を返す
      */
     function getAllPosts() public view returns (Post[] memory) {
-        Post[] memory allPosts = new Post[](totalPosts);
+        Post[] memory allPosts = new Post[](_totalPosts);
 
-        for (uint256 i = 0; i < totalPosts; ++i) {
-            allPosts[i] = posts[i];
+        for (uint256 i = 0; i < _totalPosts; ++i) {
+            allPosts[i] = _posts[i];
         }
         return allPosts;
     }
@@ -93,7 +85,6 @@ contract Posting {
      * 投稿数を返す
      */
     function getTotalPosts() public view returns (uint256) {
-        console.log("total posts: %d", totalPosts);
-        return totalPosts;
+        return _totalPosts;
     }
 }

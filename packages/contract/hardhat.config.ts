@@ -1,11 +1,11 @@
-require('@nomiclabs/hardhat-etherscan');
-require('@nomicfoundation/hardhat-toolbox');
+import { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-toolbox-viem';
 require('dotenv').config();
 
-const { ETHERSCAN_API_KEY, ALCHEMY_SEPOLIA_HTTPS, PRIVATE_KEY } = process.env;
+const { ALCHEMY_SEPOLIA_HTTPS, ETHERSCAN_API_KEY, PRIVATE_KEY } = process.env;
 
-module.exports = {
-  solidity: '0.8.18',
+const config: HardhatUserConfig = {
+  solidity: '0.8.19',
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
@@ -24,3 +24,5 @@ module.exports = {
     target: 'ethers-v5',
   },
 };
+
+export default config;
