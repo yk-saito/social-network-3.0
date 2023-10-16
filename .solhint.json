@@ -1,6 +1,14 @@
 {
   "extends": "solhint:recommended",
   "rules": {
-    "func-visibility": ["warn", { "ignoreConstructors": true }]
+    "compiler-version": ["error", "0.8.19"],
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "private-vars-leading-underscore": [
+      "error",
+      {
+        "strict": false
+      }
+    ],
+    "state-visibility": "error"
   }
 }
