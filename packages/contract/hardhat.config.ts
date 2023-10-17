@@ -1,6 +1,7 @@
-import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox-viem';
-require('dotenv').config();
+import '@typechain/hardhat';
+import 'dotenv/config';
+import { HardhatUserConfig } from 'hardhat/config';
 
 const { ALCHEMY_SEPOLIA_HTTPS, ETHERSCAN_API_KEY, PRIVATE_KEY } = process.env;
 
