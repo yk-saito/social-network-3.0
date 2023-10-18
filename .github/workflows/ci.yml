@@ -34,7 +34,7 @@ jobs:
       - name: lint
         run: yarn lint
       - name: format
-        run: yarn format:check
+        run: yarn format
 
   contract-test:
     runs-on: ubuntu-latest
