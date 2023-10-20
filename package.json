@@ -13,7 +13,8 @@
     "format:write": "biome format --write .",
     "lint": "biome lint .",
     "lint:fix": "biome check --apply .",
-    "solhint": "solhint --max-warnings 0 'packages/**/*.sol'"
+    "solhint": "solhint --max-warnings 0 'packages/**/*.sol'",
+    "test": "yarn workspace contract test"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
